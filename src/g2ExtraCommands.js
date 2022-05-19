@@ -21,21 +21,30 @@ var g2 = g2 || { prototype: {} };  // for jsdoc only ...
  * @param {object} - arguments object.
  * @property {number} x - x-value center.
  * @property {number} y - y-value center.
- * @property {number} [w=0] - angle.
+ * @property {number} [w=0] - angle
+* @property {number} ds -  [distance ,length] - space between lines, length of lines
+ * @property {number} anz -  number of lines (default:4 )
  * @example
  * g2().gndlines({x:100,y:100,r:10})
  */
 g2.prototype.gndlines = function ({ x, y, w }) { return this.addCommand({ c: 'gndlines', a: arguments[0] }); }
 g2.prototype.gndlines.prototype = {
-    x: 0, y: 0, w: 0,
+    x: 0, y: 0, w: 0, ds: [8, 11], anz: 4,
     g2(vw) {
-        const { x, y, w, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill, lw = 2 } = this;
-        return g2().beg({ x, y, w, scl: 1 })
-            .lin({ x1: -10, y1: -5, x2: -5, y2: 0, fs, ls, lw })
-            .lin({ x1: -5, y1: -5, x2: -0, y2: 0, fs, ls, lw })
-            .lin({ x1: -0, y1: -5, x2: 5, y2: 0, fs, ls, lw })
-            .lin({ x1: 5, y1: -5, x2: 10, y2: 0, fs, ls, lw })
-            .end()
+        const { x, y, w, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill, lw = 2, ds, anz } = this;
+        const dist = ds[0]; //distance between lines
+        const len = ds[1];//length of one line
+        const w2 = w - Math.PI / 4 * 3;//angle of single line
+        const drw = g2();
+        for (let i = 0; i < anz; i += 1) {
+            let x1 = x + i * dist * Math.cos(w);
+            let y1 = y + i * dist * Math.sin(w);
+            let x2 = x1 + len * Math.cos(w2);
+            let y2 = y1 + len * Math.sin(w2);
+            drw.lin({ x1: x1, y1: y1, x2: x2, y2: y2, ls: ls, lw: lw });
+        }
+        drw.end();
+        return drw;
     }
 }
 
@@ -114,12 +123,12 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
             case 'mid':
                 min = (len - 8 * (anz + 1) / 2 - len / 2) / len;
                 P1 = { x: x1 + Math.cos(angle) * len * min, y: y1 + Math.sin(angle) * len * min };
-                drw.gndline({ x: P1.x, y: P1.y, w: angle, ls: ls, lw, anz: anz });
+                drw.gndlines({ x: P1.x, y: P1.y, w: angle, ls: ls, lw, anz: anz });
                 break;
             case 'out':
                 min = (len - 8 * (anz + 1) / 2 - len / 2) / len;
                 P1 = { x: x1 + Math.cos(angle) * len * min, y: y1 + Math.sin(angle) * len * min };
-                drw.gndline({ x: P1.x, y: P1.y, w: angle, ls: ls, lw, anz: anz });
+                drw.gndlines({ x: P1.x, y: P1.y, w: angle, ls: ls, lw, anz: anz });
                 break;
             case 'full':
                 const space = ds[0]; //distance between lines
@@ -127,11 +136,11 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
                 const w2 = angle - Math.PI / 4 * 3; //Winkel der Linien
                 let iEnd = len / (space) - 2;
                 for (let i = 0; i < iEnd; i += 1) {
-                    let x1 = x1 + (i * space + space) * Math.cos(angle);
-                    let y1 = y1 + (i * space + space) * Math.sin(angle);
-                    let x2 = x1 + l * Math.cos(w2);
-                    let y2 = y1 + l * Math.sin(w2);
-                    drw.lin({ x1: x1, y1: y1, x2: x2, y2: y2, ls: ls, lw: lw });
+                    let x1f = x1 + (i * space + space) * Math.cos(angle);
+                    let y1f = y1 + (i * space + space) * Math.sin(angle);
+                    let x2f = x1 + l * Math.cos(w2);
+                    let y2f = y1 + l * Math.sin(w2);
+                    drw.lin({ x1: x1f, y1: y1f, x2: x2f, y2: y2f, ls: ls, lw: lw });
                 }
                 break;
             default:
@@ -139,10 +148,10 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
                 P1 = { x: x1 + Math.cos(angle) * len * min, y: y1 + Math.sin(angle) * len * min };
                 const start2 = (len - 6 * 5) / len;
                 const P2 = { x: x1 + Math.cos(angle) * len * start2, y: y1 + Math.sin(angle) * len * start2 }
-                drw.grdlines({ x: P1.x, y: P1.y, w: angle, ls: ls, lw: lw });
-                drw.grdlines({ x: P2.x, y: P2.y, w: angle, ls: ls, lw: lw });
+                drw.gndlines({ x: P1.x, y: P1.y, w: angle, ls: ls, lw: lw });
+                drw.gndlines({ x: P2.x, y: P2.y, w: angle, ls: ls, lw: lw });
                 break;
         }
-        return drw.lin({ x1, y1, x2, y2 });
+        return g2().lin({ x1, y1, x2, y2 });
     }
 });
