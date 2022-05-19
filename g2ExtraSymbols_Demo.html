@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>g2ExtensionDemo</title>
+
+</head>
+
+<body>
+    <script src=".src/g2.js"></script>
+    <script src=".src/g2Extras.js"></script>
+    <script src=".src/g2ExtraSymbols.js"></script>
+
+
+    <h1>g2 Extra Symbols Demo</h1>
+    <canvas id="cnv" width="900px" height="900px" style="border:1px solid #000000;"></canvas>
+    <script>
+
+        const ctx = document.getElementById("cnv").getContext("2d");
+        const viewport = ctx.canvas.getBoundingClientRect(),  // viewport size ..
+            vw = { x: 0, y: 0, scl: 1 };
+        const g = g2().view({ vw })// use vw to change view on the run
+            .view({ cartesian: true })
+            .clr().grid()
+            .origin({ x: 0, y: 0 });
+        const D = { x: 20, y: 100 };
+
+        g.use({ grp: g2.symbol.pol, x: 20, y: 20, w: 1.5, label: { str: 'A0', loc: 'n' } });
+
+        g.use({ grp: "pol", p: D, w: -1.5, ls: "green", fs: "pink", label: 'D' });
+        g.use({ grp: "nodfix2", x: 20, y: 100, w: 1.5, ls: "green" })
+            .nodfix2({ x: 20, y: 150 })
+            .ins(g2.symbol.nodfix2())
+            .use({ grp: g2.symbol.nodfix2(), p: B0, w: 0, ls: "green", fs: "pink" })
+
+
+
+        g.exe(ctx);
+
+
+    </script>
+
+</body>
+
+</html>
