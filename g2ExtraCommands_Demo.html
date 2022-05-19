@@ -9,11 +9,12 @@
 </head>
 
 <body>
-    <h1>g2 Extra Symbols Demo</h1>
+    <h1>g2 Extra Commands Demo</h1>
     <canvas id="cnv" width="900px" height="900px" style="border:1px solid #000000;"></canvas>
     <script src="./src/g2.js"></script>
-    <!-- <script src="./src/g2Extras.js"></script>-->
     <script src="./src/g2ExtraSymbols.js"></script>
+    <script src="./src/g2ExtraCommands.js"></script>
+
     <script>
 
         const ctx = document.getElementById("cnv").getContext("2d");
@@ -25,13 +26,14 @@
             .clr().grid();
         const D = { x: 20, y: 100 };
 
-        g.use({ grp: g2.symbol.pol, x: 20, y: 20, w: 1.5, label: { str: 'A0', loc: 'n' } });
-
-        g.use({ grp: "pol", p: D, w: -1.5, ls: "green", fs: "pink", label: 'D' });
+        // g.gndline({ x1: 20, y1: 20, x2: 220, y2: 340, w: 1, label: { str: 'A0', loc: 'n' } });
+        g.gndlines({ x: 20, y: 20, w: 1, label: { str: 'A0', loc: 'n' } });
+        g.gndlines({ x: 120, y: 20, w: 0, });
         g.use({ grp: "slider", x: 120, y: 100, w: 1.5, ls: "green" });
-        g.use({ grp: "Xcross", x: 420, y: 400, w: 0, scl: 10, ls: "red" });
-
-
+        g.use({ grp: "pol", x: 120, y: 100, w: 1.5, ls: "green" });
+        g.nodfix2({ x: 520, y: 20, w: 0, label: "A0" });
+        const B0 = { x: 520, y: 120, w: 1.0, label: "B0" }
+        g.nodfix2(B0);
         g.exe(ctx);
 
 
