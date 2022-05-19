@@ -59,11 +59,19 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
     width: 9,//width of nodifix,
     h: 12, //height
     g2() {
-        const { x, y, w, h, scl, width, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill, fs_2 = '#fefefe99' } = this;
+        const { x, y, w, h, scl, width, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill3, fs_2 = '#fefefe99' } = this;
         let FG = g2().beg({ x, y, scl, w })
-            .lin({ x1: 3, y1: 2, x2: width, y2: -h })
-            .lin({ x1: -3, y1: 2, x2: -width, y2: -h })
             .lin({ x1: -width - 5, y1: -h, x2: width + 5, y2: -h })
+            .path({
+                seg: [
+                    { c: 'm', x: -3, y: 2 },
+                    { c: 'l', x: -width, y: -h },
+                    { c: 'l', x: width, y: -h },
+                    { c: 'l', x: 3, y: 2 },
+                    { c: 'l', x: -3, y: 2 },
+                    { c: 'z' }
+                ], ls: 'transparent', fs
+            })
             .use({ grp: "pol", x: 0, y: 0, scl: 1 });
         let StepSize = width * 2 / 3;
         for (let i = -width + 2; i < width + 5; i += StepSize) {
