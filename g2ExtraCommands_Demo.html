@@ -34,6 +34,8 @@
         g.nodfix2({ x: 520, y: 20, w: 0, label: "A0" });
         const B0 = { x: 520, y: 120, w: 1.0, label: "B0" }
         g.nodfix2(B0);
+        g.gndline({ x1: 10, y1: 220, x2: -100, y2: 600, label: "line", lw: 4, ls: "black" });
+
         g.exe(ctx);
 
 
