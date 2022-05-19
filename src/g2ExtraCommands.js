@@ -70,7 +70,7 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
                     { c: 'l', x: 3, y: 2 },
                     { c: 'l', x: -3, y: 2 },
                     { c: 'z' }
-                ], ls: 'transparent', fs
+                ], ls, fs
             })
             .use({ grp: "pol", x: 0, y: 0, scl: 1 });
         let StepSize = width * 2 / 3;
