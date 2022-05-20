@@ -29,7 +29,7 @@ var g2 = g2 || { prototype: {} };  // for jsdoc only ...
  */
 g2.prototype.gndlines = function ({ x, y, w }) { return this.addCommand({ c: 'gndlines', a: arguments[0] }); }
 g2.prototype.gndlines.prototype = {
-    x: 0, y: 0, w: 0, ds: [8, 11], anz: 4,
+    x: 0, y: 0, w: 0, ds: [8, 13], anz: 4,
     g2(vw) {
         const { x, y, w, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill, lw = 2, ds, anz } = this;
         const dist = ds[0]; //distance between lines
@@ -67,7 +67,7 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
     lboff: 4,
     width: 9,//width of nodifix,
     h: 12, //height
-    g2() {
+    g2(vw) {
         const { x, y, w, h, scl, width, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill3, fs_2 = '#fefefe99' } = this;
         let FG = g2().beg({ x, y, scl, w })
             .lin({ x1: -width - 5, y1: -h, x2: width + 5, y2: -h })
@@ -97,7 +97,7 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
  * Draw fixed line
  * @method
  * @returns {object} g2
- * @param {object} - lin arguments object.
+ * @param {object} - gndlin arguments object.
  * @property {number} x1 -  x1 coordinate.
  * @property {number} y1 -  y1 coordinate.
  * @property {number} x2 -  x2 coordinate.
@@ -105,12 +105,13 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
  * @property {string} typ -  typ |'out'|'mid'
  * @property {string} ls -  color of line
  * @property {array} ds -  [space, length] space=distance between gndlines; length=length of gndlines
+ * @property {number} anz -  number of lines for the gndlines symbol; by default anz=4
  * @example
- * g2().nodfix2({x:150,y:75})
+ * g2().gndline({x1:150,y1:75,x2:350,y2:125,typ:'out'})
  */
 g2.prototype.gndline = function ({ x1, x2, y1, y2, typ, ls }) { return this.addCommand({ c: 'gndline', a: arguments[0] }); }
 g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
-    x1: 0, y1: 0, x2: 100, y2: 100, ls: "black",
+    x1: 0, y1: 0, x2: 100, y2: 100, ls: "black", lboff: "4", lbloc: "e",
     g2(vw) {
         const { x1, y1, x2, y2, lw = 1, ls = g2.symbol.nodcolor, typ = 'out', anz = 4, ds = [5, 10] } = this;
         const vec = { x: x2 - x1, y: y2 - y1 };
@@ -152,6 +153,132 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
                 drw.gndlines({ x: P2.x, y: P2.y, w: angle, ls: ls, lw: lw });
                 break;
         }
-        return g2().lin({ x1, y1, x2, y2 });
+        return drw.lin({ x1, y1, x2, y2, lw: lw * 1.1 });
     }
 });
+
+/**
+ * Draws fixed slot for slider
+ * @method
+ * @returns {object} g2
+ * @param {object} - guide arguments object.
+ * @property {number} x1 -  x1 coordinate.
+ * @property {number} y1 -  y1 coordinate.
+ * @property {number} x2 -  optional x2 coordinate.
+ * @property {number} y2 -  optional y2 coordinate.
+ * @property {number} w -  optional angle coordinate.
+ *  @property {number} len -  optional length coordinate.
+ *@property {number} width - width of slot; default: width=
+ * @property {string} ls -  color of line
+ * @property {array} ds -  [space, length] space=distance between gndlines; length=length of gndlines
+ * @property {number} anz -  number of lines for the gndlines symbol; by default anz=4
+ * @example
+ * g2().guide({x1:150,y1:75,x2:350,y2:125,typ:'out'})
+ */
+g2.prototype.guide = function ({ x1, x2, y1, y2, w, ls }) { return this.addCommand({ c: 'guide', a: arguments[0] }); }
+g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
+    lbloc: 'w',
+    lboff: 4,
+    g2(vw) {
+        const { x1, y1, x2, y2, lw = 1, ls = g2.symbol.nodcolor, anz = 4, ds = [5, 10] } = this;
+        let args, vec, w, len;
+        if (this.w === undefined) {
+            vec = { x: x2 - x1, y: y2 - y1 };
+            w = Math.atan2(vec.y, vec.x);//Winkel des Vektors            
+        }
+        else {
+            len = Object.getOwnPropertyDescriptor(this, 'len') ? this.len : 100;
+            w = this.w;//Winkel des Vektors
+            vec = { x: len * Math.cos(w), y: Math.sin(w) * len };
+            const w2 = Math.atan2(vec.y, vec.x);
+        }
+        const width = Object.getOwnPropertyDescriptor(this, 'width') ? this.width : 24;
+        //calculate corner Points
+        const CP1 = { x: x1 - Math.sin(w) * width / 2, y: y1 + Math.cos(w) * width / 2 };
+        const CP2 = { x: CP1.x + vec.x, y: CP1.y + vec.y };
+        const CP3 = { x: x1 + Math.sin(w) * width / 2, y: y1 - Math.cos(w) * width / 2 };
+        const CP4 = { x: CP3.x + vec.x, y: CP3.y + vec.y };
+
+        //start Drawing
+        const drw = g2().beg({ ls: ls })
+            .gndline({ x1: CP2.x, y1: CP2.y, x2: CP1.x, y2: CP1.y, lw: lw, ds, anz, typ: 'out' })
+            .gndline({ x1: CP3.x, y1: CP3.y, x2: CP4.x, y2: CP4.y, lw: lw, ds, anz, typ: 'out' })
+            .end();
+        return drw;
+    }
+})
+
+
+/**
+ * Draws fixed slot for slider
+ * @method
+ * @returns {object} g2
+ * @param {object} - guide arguments object.
+ * @property {object} p1 - node
+* @property {object} p2 - node
+* @property {object} p3 - node
+* @property {number} size - size of corner; default: size=45
+* @property {number} side - side of corner; default: side=1
+ * @property {string} ls -  color of line
+ * @property {array} ds -  [space, length] space=distance between gndlines; length=length of gndlines
+ * @property {number} anz -  number of lines for the gndlines symbol; by default anz=4
+ * @example
+ * g2().Ecke({p1:{x:0,y:0},p2:{x:100,y:0},p3:{x:50,y:50}})
+ */
+g2.prototype.Ecke = function ({ p1, p2, p3, w, ls }) { return this.addCommand({ c: 'Ecke', a: arguments[0] }); }
+g2.prototype.Ecke.prototype = {
+    lbloc: "e", lboff: 2,
+    g2(vw) {
+        const { p1, p2, p3, ls = "black", size = 45, side = 1, fs = "transparent" } = this;
+        const alpha1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
+        const alpha2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
+        let dw = alpha2 - alpha1;
+        if (side < 1)
+            dw = 2 * Math.PI - dw;
+        const g = g2().beg({ x: p2.x, y: p2.y, w: Math.atan2(p1.y - p2.y, p1.x - p2.x) });
+        g.p().m({ x: size, y: 0 })
+            //.q({x1:this.size*Math.cos(dw/2*this.side)/2,y1:this.size*Math.sin(dw/2*this.side)/2,x:this.size*Math.cos(dw*this.side),y:this.size*Math.sin(dw*this.side)})    //first Point is control point        
+            .q({ x1: 0, y1: 0, x: size * Math.cos(dw * side), y: size * Math.sin(dw * side) })
+            .l({ x: 0, y: 0 })
+            .l({ x: size, y: 0 })
+            .z()
+            .fill({ fs: fs });
+        g.end();
+        return g;
+    }
+}
+
+/**
+ * corner between three nodes
+ * @param {object} - corner shape.
+ * @property {string} [p1] - referenced node id for position.
+ * @property {string} [p2] - referenced node id for position2.
+ * @property {string} [p] - referenced node id for position
+ * @property {string} [wref1] - referenced constraint id for angle1.
+ * @property {string} [wref2] - referenced constraint id for angle2.
+ */
+g2.prototype.corner = function ({ p1, p2, p, w, ls }) { return this.addCommand({ c: 'corner', a: arguments[0] }); }
+g2.prototype.corner.prototype = {
+    lbloc: "e", lboff: 2,
+    g2(vw) {
+        const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 4, size = 20 } = this;
+        const w1 = this.wref1 === undefined ? Math.atan2(p1.x - p.x, p1.y - p.y) : this.wref1.w;
+        const w2 = this.wref2 === undefined ? Math.atan2(p2.x - p.x, p2.y - p.y) : this.wref2.w;
+        let dw = w2 - w1;
+        const angle1 = this.wref1 === undefined ? Math.atan2(p1.x - p.x, p1.y - p.y) : this.wref1.w;
+        const angle2 = this.wref2 === undefined ? Math.atan2(p2.x - p.x, p2.y - p.y) : this.wref2.w;
+        const drw = g2();
+        drw.beg({ x: () => p.x, y: () => p.y, w: w1 });
+        drw.p().m({ x: this.size, y: 0 })
+            .l({ x: Math.cos(dw) * size, y: Math.sin(dw) * size })
+            .l({ x: 0, y: 0 })
+            .l({ x: size, y: 0 })
+            .z()
+            .stroke({ ls: '#888', lw: 2, lc: 'round', lj: 'round' });
+        drw.end();
+
+        return drw;
+
+
+    }
+}

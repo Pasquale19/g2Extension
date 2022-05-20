@@ -10,7 +10,7 @@
 
 <body>
     <h1>g2 Extra Commands Demo</h1>
-    <canvas id="cnv" width="900px" height="900px" style="border:1px solid #000000;"></canvas>
+    <canvas id="cnv" width="1300px" height="900px" style="border:1px solid #000000;"></canvas>
     <script src="./src/g2.js"></script>
     <script src="./src/g2ExtraSymbols.js"></script>
     <script src="./src/g2ExtraCommands.js"></script>
@@ -35,7 +35,15 @@
         const B0 = { x: 520, y: 120, w: 1.0, label: "B0" }
         g.nodfix2(B0);
         g.gndline({ x1: 10, y1: 220, x2: -100, y2: 600, label: "line", lw: 4, ls: "black", typ: "out" });
+        g.gndline({ x1: 110, y1: 220, x2: 00, y2: 600, label: "line", lw: 4, ls: "black", typ: "mid" });
+        g.gndline({ x1: 210, y1: 220, x2: 100, y2: 600, label: "line", lw: 4, ls: "black", typ: "full" });
+        g.gndline({ x1: 310, y1: 220, x2: 200, y2: 600, label: "line", lw: 4, ls: "black" });
+        g.guide({ x1: 310, y1: 620, x2: 800, y2: 700, label: "guide", lw: 2, ls: "black", ds: [10, 10], anz: 3 });
+        g.guide({ x1: 310, y1: 420, w: 1, len: 200, label: "guide2", lw: 2, ls: "black", ds: [10, 10], anz: 3 });
 
+        const E0 = { x: 700, y: 100 }; const F0 = { x: 900, y: 100 }; const G0 = { x: 800, y: 200 }; const H0 = { x: 700, y: 300 }; const I0 = { x: 900, y: 300 };
+        g.corner({ p1: E0, p2: F0, p: G0, ls: "pink", fs: "grey" });
+        g.Ecke({ p1: G0, p2: H0, p3: I0 });
         g.exe(ctx);
 
 
