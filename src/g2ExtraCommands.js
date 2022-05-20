@@ -130,6 +130,7 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
                 min = (len - 8 * (anz + 1) / 2 - len / 2) / len;
                 P1 = { x: x1 + Math.cos(angle) * len * min, y: y1 + Math.sin(angle) * len * min };
                 drw.gndlines({ x: P1.x, y: P1.y, w: angle, ls: ls, lw, anz: anz });
+                console.log("out");
                 break;
             case 'full':
                 const space = ds[0]; //distance between lines
@@ -226,7 +227,7 @@ g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
  * g2().Ecke({p1:{x:0,y:0},p2:{x:100,y:0},p3:{x:50,y:50}})
  */
 g2.prototype.Ecke = function ({ p1, p2, p3, w, ls }) { return this.addCommand({ c: 'Ecke', a: arguments[0] }); }
-g2.prototype.Ecke.prototype = {
+g2.prototype.Ecke.prototype = g2.mixin(g2.ifc.label, {
     lbloc: "e", lboff: 2,
     g2(vw) {
         const { p1, p2, p3, ls = "black", size = 45, side = 1, fs = "transparent" } = this;
@@ -242,11 +243,11 @@ g2.prototype.Ecke.prototype = {
             .l({ x: 0, y: 0 })
             .l({ x: size, y: 0 })
             .z()
-            .fill({ fs: fs });
+            .fill({ fs: fs, ls: ls });
         g.end();
         return g;
     }
-}
+})
 
 /**
  * corner between three nodes
@@ -261,7 +262,7 @@ g2.prototype.corner = function ({ p1, p2, p, w, ls }) { return this.addCommand({
 g2.prototype.corner.prototype = {
     lbloc: "e", lboff: 2,
     g2(vw) {
-        const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 4, size = 20 } = this;
+        const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 4, size = 20, fs = "black" } = this;
         const w1 = this.wref1 === undefined ? Math.atan2(p1.x - p.x, p1.y - p.y) : this.wref1.w;
         const w2 = this.wref2 === undefined ? Math.atan2(p2.x - p.x, p2.y - p.y) : this.wref2.w;
         let dw = w2 - w1;
@@ -274,7 +275,7 @@ g2.prototype.corner.prototype = {
             .l({ x: 0, y: 0 })
             .l({ x: size, y: 0 })
             .z()
-            .stroke({ ls: '#888', lw: 2, lc: 'round', lj: 'round' });
+            .fill({ fs: fs, ls: ls, lw: 2, lc: 'round', lj: 'round' });
         drw.end();
 
         return drw;
