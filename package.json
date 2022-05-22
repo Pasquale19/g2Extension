@@ -1,0 +1,35 @@
+{
+  "name": "g2extension",
+  "version": "0.1",
+  "description": "g2extension - an Extension for the g2-Library",
+  "keywords": [
+    "g2",
+    "model",
+    "2d",
+    "javascript"
+  ],
+  "main": "mec2.js",
+  "scripts": {
+    "build": "npm run concat && npm run minify ",
+    "update": "npm run concat && npm run minify && npm run concatFull && npm run minifyFull",
+    "concat": "concat ./src/g2ExtraSymbols.js ./src/g2ExtraCommands.js  > ./release/g2Extension.js",
+    "minify": "uglifyjs ./src/g2ExtraSymbols.js ./src/g2ExtraCommands.js  -o ./release/g2Extension.min.js --comments -m",
+    "concatFull": "concat ./src/g2.js ./src/g2ExtraSymbols.js ./src/g2ExtraCommands.js > ./release/g2FullExtension.js",
+    "minifyFull": "uglifyjs ./src/g2.js ./src/g2ExtraSymbols.js ./src/g2ExtraCommands.js -o ./release/g2FullExtension.min.js --comments -m",
+    "gzip": "7z -tgzip a ./release/g2Extension.js.gz .release/g2Extension.js"
+  },
+  "author": "Pascal Schnabel <pascal.schnabel@mb.tu-chemnitz.de>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Pasquale19/g2Extension"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "concat": "^1.0.0",
+    "uglify-es": "^3.3.9"
+  },
+  "microjam": {},
+  "dependencies": {
+    "node-7z": "^3.0.0"
+  }
+}
