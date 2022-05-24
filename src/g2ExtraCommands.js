@@ -110,7 +110,7 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
  * g2().gndline({x1:150,y1:75,x2:350,y2:125,typ:'out'})
  */
 g2.prototype.gndline = function ({ x1, x2, y1, y2, typ, ls }) { return this.addCommand({ c: 'gndline', a: arguments[0] }); }
-g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, {
+g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
     x1: 0, y1: 0, x2: 100, y2: 100, ls: "black",
     g2(vw) {
         const { x1, y1, x2, y2, lw = 2, ls = g2.symbol.nodcolor, typ = 'out', anz = 4, ds = [5, 12] } = this;
@@ -217,7 +217,7 @@ g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
  * @returns {object} g2
  * @param {object} - guide arguments object.
  * @property {object} p1 - node
-* @property {object} p2 - node
+* @property {object} p2 - inner node
 * @property {object} p3 - node
 * @property {number} size - size of corner; default: size=45
 * @property {number} side - side of corner; default: side=1
@@ -238,50 +238,60 @@ g2.prototype.Ecke.prototype = g2.mixin(g2.ifc.label, {
         if (side < 1)
             dw = 2 * Math.PI - dw;
         const g = g2().beg({ x: p2.x, y: p2.y, w: Math.atan2(p1.y - p2.y, p1.x - p2.x) });
-        g.p().m({ x: size, y: 0 })
-            //.q({x1:this.size*Math.cos(dw/2*this.side)/2,y1:this.size*Math.sin(dw/2*this.side)/2,x:this.size*Math.cos(dw*this.side),y:this.size*Math.sin(dw*this.side)})    //first Point is control point        
-            .q({ x1: 0, y1: 0, x: size * Math.cos(dw * side), y: size * Math.sin(dw * side) })
-            .l({ x: 0, y: 0 })
-            .l({ x: size, y: 0 })
-            .z()
-            .fill({ fs: fs, ls: ls });
+
+        g.path({
+            seg: [
+                { c: 'm', x: size, y: 0 },
+                { c: 'q', x: size * Math.cos(dw * side), y: size * Math.sin(dw * side) }, { x1: 0, y1: 0 },//zweiter Punkt ist Zielpunkt
+                { c: 'l', x: 0, y: 0 },
+                { c: 'l', x: size, y: 0 },
+                { c: 'z' }
+                , ls, fs]
+        });
+        /* g.p().m({ x: size, y: 0 })
+             //.q({x1:this.size*Math.cos(dw/2*this.side)/2,y1:this.size*Math.sin(dw/2*this.side)/2,x:this.size*Math.cos(dw*this.side),y:this.size*Math.sin(dw*this.side)})    //first Point is control point        
+             .q({ x1: 0, y1: 0, x: size * Math.cos(dw * side), y: size * Math.sin(dw * side) })
+             .l({ x: 0, y: 0 })
+             .l({ x: size, y: 0 })
+             .z()
+             .fill({ fs: fs, ls: ls });*/
         g.end();
         return g;
     }
 })
 
 /**
- * corner between three nodes
+ * angle symbol between three nodes
  * @param {object} - corner shape.
  * @property {string} [p1] - referenced node id for position.
  * @property {string} [p2] - referenced node id for position2.
  * @property {string} [p] - referenced node id for position
  * @property {string} [wref1] - referenced constraint id for angle1.
  * @property {string} [wref2] - referenced constraint id for angle2.
- * @property {number} [r] - radius of corner or size
+ * @property {number} [r] - radius of angle symbol
  */
-g2.prototype.corner = function ({ p1, p2, p, w, ls, r }) { return this.addCommand({ c: 'corner', a: arguments[0] }); }
-g2.prototype.corner.prototype = {
+g2.prototype.angle = function ({ p1, p2, p, w, ls, r }) { return this.addCommand({ c: 'angle', a: arguments[0] }); }
+g2.prototype.angle.prototype = {
     lbloc: "e", lboff: 2,
     g2(vw) {
-        const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 4, size = 20, fs = "black", side = 1, r = 20 } = this;
-        const w1 = this.wref1 === undefined ? Math.atan2(-p1.x + p.x, -p1.y + p.y) : this.wref1.w;
-        const w2 = this.wref2 === undefined ? Math.atan2(-p2.x + p.x, -p2.y + p.y) : this.wref2.w;
-        let dw = (w2 - w1 + Math.PI * 2) % (Math.PI);
-        if (this.side < 1) { dw = -dw; }
-        console.log(`dw:${dw * 180 / Math.PI}`);
-
-        const P1 = { x: p.x + -Math.cos(w1) * r, y: -Math.sin(w1) * r + p.y };
-        const P2 = { x: p.x + Math.cos(w2) * r, y: Math.sin(w2) * r + p.y };
-        const drw = g2();
+        const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 4, size = 20, fs = "transparent", side = 1, r = 20 } = this;
+        const w1 = this.wref1 === undefined ? Math.PI + Math.atan2(p1.y - p.y, p1.x - p.x) : this.wref1.w;
+        const w2 = this.wref2 === undefined ? Math.PI + Math.atan2(p2.y - p.y, p2.x - p.x) : this.wref2.w;
+        let dw = (w2 - w1) % (2 * Math.PI);
+        const v1 = { x: p.x + Math.cos(w1) * r, y: Math.sin(w1) * r + p.y };
+        const v2 = { x: p.x + Math.cos(w2) * r, y: Math.sin(w2) * r + p.y };
+        const drw = g2().beg({ fs: fs, ls: ls });
         drw.p().m({ x: p.x, y: p.y })
-            .l({ x: P1.x, y: P1.y })
-            .a({ dw: (w2 - w1) * side, x: P2.x, y: P2.y })
+            .l({ x: v1.x, y: v1.y })
+            .a({ dw: dw, x: v2.x, y: v2.y })
             .l({ x: p.x, y: p.y })
             .z()
-            .stroke();
-        drw.cir({ x: P1.x, y: P1.y, r: 5, ls: "red" });
-        drw.cir({ x: P2.x, y: P2.y, r: 5, ls: "green" });
+            .fill(fs);
+        drw.cir({ p: p, label: { str: `${Math.round(180 / Math.PI * dw)}°` } })
+        drw.lin({ p1: p, p2: v1 });
+        drw.arc({ p: p, r: r, w: w1, dw: dw, label: { str: '@angle;°' } })
+        drw.lin({ p1: p, p2: v2 });
+        drw.end();
         /* drw.beg({ x: () => p.x, y: () => p.y, w: w1 });
          drw.p().m({ x: this.size, y: 0 })
              .l({ x: Math.cos(dw) * size, y: Math.sin(dw) * size })
