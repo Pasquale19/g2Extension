@@ -29,7 +29,7 @@ var g2 = g2 || { prototype: {} };  // for jsdoc only ...
  * g2().gndlines({x:100,y:100,r:10})
  */
 g2.prototype.gndlines = function ({ x, y, w, anz, ds }) { return this.addCommand({ c: 'gndlines', a: arguments[0] }); }
-g2.prototype.gndlines.prototype = {
+g2.prototype.gndlines.prototype = g2.mixin(g2.ifc.point, {
     x: 0, y: 0, w: 0,
     g2(vw) {
         const { x, y, w, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill, lw = 2, ds = [8, 13], anz = 4 } = this;
@@ -47,7 +47,7 @@ g2.prototype.gndlines.prototype = {
         drw.end();
         return drw;
     }
-}
+});
 
 /**
  * Draw fixed node.
@@ -65,6 +65,7 @@ g2.prototype.nodfix2 = function ({ x, y, w, scl }) { return this.addCommand({ c:
 g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.label, {
     x: 0, y: 0, w: 0, scl: 1,
     lbloc: 'e',
+    r: "5",
     lboff: 4,
     width: 9,//width of nodifix,
     h: 12, //height
@@ -209,7 +210,7 @@ g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
             .end();
         return drw;
     }
-})
+});
 
 
 /**
@@ -221,7 +222,7 @@ g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
 * @property {object} p2 - inner node
 * @property {object} p3 - node
 * @property {number} size - size of corner; default: size=45
-* @property {number} side - side of corner; default: side=1
+* @property {number} side - side of corner; default: side=1 //not working at the moment
  * @property {string} ls -  color of line
  * @property {array} ds -  [space, length] space=distance between gndlines; length=length of gndlines
  * @property {number} anz -  number of lines for the gndlines symbol; by default anz=4
@@ -232,27 +233,36 @@ g2.prototype.Ecke = function ({ p1, p2, p3, w, ls }) { return this.addCommand({ 
 g2.prototype.Ecke.prototype = g2.mixin(g2.ifc.label, {
     lbloc: "e", lboff: 2,
     g2(vw) {
-        const { p1, p2, p3, ls = "black", size = 45, side = 1, fs = "transparent" } = this;
+        const { p1, p2, p3, ls = "black", size = 45, side = 1, fs = "black" } = this;
         const alpha1 = Math.atan2(p1.y - p2.y, p1.x - p2.x);
         const alpha2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
         let dw = alpha2 - alpha1;
-        if (side < 1)
-            dw = 2 * Math.PI - dw;
-        const g = g2().beg({ x: p2.x, y: p2.y, w: Math.atan2(p1.y - p2.y, p1.x - p2.x) });
-
+        /*  if (side < 1)
+              dw = 2 * Math.PI - dw;*/
+        const g = g2().beg({ x: p2.x, y: p2.y, w: alpha1 });
+        /*      g.p().m({ x: size, y: 0 })
+                  //.q({x1:this.size*Math.cos(dw/2*this.side)/2,y1:this.size*Math.sin(dw/2*this.side)/2,x:this.size*Math.cos(dw*this.side),y:this.size*Math.sin(dw*this.side)})    //first Point is control point        
+                  .q({ x1: 0, y1: 0, x: size * Math.cos(dw * side), y: size * Math.sin(dw * side) })
+                  .l({ x: 0, y: 0 })
+                  .l({ x: size, y: 0 })
+                  .z()
+                  .fill({ fs: fs });
+              g.end();
+              return g;*/
         g.path({
             seg: [
                 { c: 'm', x: size, y: 0 },
-                { c: 'q', x: size * Math.cos(dw * side), y: size * Math.sin(dw * side) }, { x1: 0, y1: 0 },//zweiter Punkt ist Zielpunkt
+                { c: 'q', x: 0, y: 0 }, { x: size * Math.cos(dw), y: size * Math.sin(dw) },//zweiter Punkt ist Zielpunkt
                 { c: 'l', x: 0, y: 0 },
                 { c: 'l', x: size, y: 0 },
                 { c: 'z' }
                 , ls, fs]
         });
         g.end();
+        console.log(fs);
         return g;
     }
-})
+});
 
 /**
  * angle symbol between three nodes
@@ -290,4 +300,4 @@ g2.prototype.angle.prototype = {
 
 
     }
-}
+};

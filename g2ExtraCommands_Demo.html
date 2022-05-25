@@ -48,7 +48,7 @@
         const E0 = { x: 700, y: 100, label: "E0" }; const F0 = { x: 900, y: 100, label: "F0" }; const G0 = { x: 800, y: 200, label: "G0" }; const H0 = { x: 700, y: 300, label: "H0" }; const I0 = { x: 900, y: 300, label: "I0" };
         g.angle({ p1: F0, p2: G0, p: E0, ls: "blue", fs: "white", r: 80, side: -1 });
         g.pol(E0).pol(F0).pol(I0).nod(G0).nod(H0).nod(I0);
-        g.Ecke({ p1: G0, p2: H0, p3: I0, ls: "blue", fs: "green", size: 90 });
+        g.Ecke({ p1: G0, p2: H0, p3: I0, ls: "blue", fs: "green", size: 90, side: -2 });
         g.exe(ctx).exe(document.getElementById("svg"));;
 
         interactor
