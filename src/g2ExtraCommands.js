@@ -5,6 +5,7 @@
  * @license MIT License
  * @requires g2.core.js
  * @requires g2.ext.js
+ *  * @requires g2ExtraSymbols.js
  * @typedef {g2}
  * @description Mechanical extensions. (Requires cartesian coordinates)
  * @returns {g2}
@@ -27,11 +28,11 @@ var g2 = g2 || { prototype: {} };  // for jsdoc only ...
  * @example
  * g2().gndlines({x:100,y:100,r:10})
  */
-g2.prototype.gndlines = function ({ x, y, w }) { return this.addCommand({ c: 'gndlines', a: arguments[0] }); }
+g2.prototype.gndlines = function ({ x, y, w, anz, ds }) { return this.addCommand({ c: 'gndlines', a: arguments[0] }); }
 g2.prototype.gndlines.prototype = {
-    x: 0, y: 0, w: 0, ds: [8, 13], anz: 4,
+    x: 0, y: 0, w: 0,
     g2(vw) {
-        const { x, y, w, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill, lw = 2, ds, anz } = this;
+        const { x, y, w, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill, lw = 2, ds = [8, 13], anz = 4 } = this;
         const dist = ds[0]; //distance between lines
         const len = ds[1];//length of one line
         const w2 = w - Math.PI / 4 * 3;//angle of single line
@@ -109,9 +110,9 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
  * @example
  * g2().gndline({x1:150,y1:75,x2:350,y2:125,typ:'out'})
  */
-g2.prototype.gndline = function ({ x1, x2, y1, y2, typ, ls }) { return this.addCommand({ c: 'gndline', a: arguments[0] }); }
+g2.prototype.gndline = function ({ x1, x2, y1, y2, typ, ls, ds, anz }) { return this.addCommand({ c: 'gndline', a: arguments[0] }); }
 g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
-    x1: 0, y1: 0, x2: 100, y2: 100, ls: "black",
+    x1: 0, y1: 0, x2: 100, y2: 100,
     g2(vw) {
         const { x1, y1, x2, y2, lw = 2, ls = g2.symbol.nodcolor, typ = 'out', anz = 4, ds = [5, 12] } = this;
         const vec = { x: x2 - x1, y: y2 - y1 };
@@ -248,13 +249,6 @@ g2.prototype.Ecke.prototype = g2.mixin(g2.ifc.label, {
                 { c: 'z' }
                 , ls, fs]
         });
-        /* g.p().m({ x: size, y: 0 })
-             //.q({x1:this.size*Math.cos(dw/2*this.side)/2,y1:this.size*Math.sin(dw/2*this.side)/2,x:this.size*Math.cos(dw*this.side),y:this.size*Math.sin(dw*this.side)})    //first Point is control point        
-             .q({ x1: 0, y1: 0, x: size * Math.cos(dw * side), y: size * Math.sin(dw * side) })
-             .l({ x: 0, y: 0 })
-             .l({ x: size, y: 0 })
-             .z()
-             .fill({ fs: fs, ls: ls });*/
         g.end();
         return g;
     }
@@ -292,15 +286,6 @@ g2.prototype.angle.prototype = {
         drw.arc({ p: p, r: r, w: w1, dw: dw, label: { str: '@angle;°' } })
         drw.lin({ p1: p, p2: v2 });
         drw.end();
-        /* drw.beg({ x: () => p.x, y: () => p.y, w: w1 });
-         drw.p().m({ x: this.size, y: 0 })
-             .l({ x: Math.cos(dw) * size, y: Math.sin(dw) * size })
-             .l({ x: 0, y: 0 })
-             .l({ x: size, y: 0 })
-             .z()
-             .fill({ fs: fs, ls: ls, lw: 2, lc: 'round', lj: 'round' });
-         drw.end();*/
-
         return drw;
 
 

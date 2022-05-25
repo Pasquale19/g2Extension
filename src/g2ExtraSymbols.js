@@ -14,7 +14,7 @@
  * @property {string} [symbol.nodfill3=white]    node color.
  * @property {object} [symbol.poldot] Pole Symbol
  * @property {object} [symbol.Xcross] X-Symbol
- * @property {object} [symbol.gndlines] ground line symbol
+ * @property {object} [symbol.gndlines] ground lines symbol
  */
 g2.symbol = g2.symbol || {};
 g2.symbol.poldot = g2().cir({ x: 0, y: 0, r: 1.32, ls: "transparent", fs: "black" });
@@ -26,34 +26,6 @@ g2.symbol.gndlines = g2().lin({ x1: -10, y1: -5, x2: -5, y2: 0 })
     .lin({ x1: -0, y1: -5, x2: 5, y2: 0 })
     .lin({ x1: 5, y1: -5, x2: 10, y2: 0 });
 
-
-/**
- * @property {object} [symbol.nodfix2] Predefined symbol: FG
- */
-g2.symbol.nodfix2 = function () {
-    const w = 9,
-        h = 12;
-    const FG = g2().p().m({ x: 3, y: 2 })
-        .l({ x: -3, y: 2 })
-        .l({ x: -w, y: -h })
-        .l({ x: w, y: -h })
-        .l({ x: 3, y: 2 })
-        .z()
-        .stroke({ ls: 'black', lw: 1.1, fs: 'white' });
-
-    /*FG.lin({x1: 3, y1:2,x2:w,y2:-h})
-    .lin({x1: -3, y1:2,x2:-w,y2:-h})
-    .lin({x1: -w-5, y1:-h,x2:w+5,y2:-h});*/
-    const StepSize = w * 2 / 3;
-    for (let i = -w + 2; i < w + 5; i += StepSize) {
-        let l = 6;
-        FG.lin({ x1: i, y1: -h, x2: i - l, y2: -h - l });
-    }
-    FG.lin({ x1: -w - 3, y1: -h, x2: w + 3, y2: -h })
-    FG.use({ grp: 'pol' });
-    FG.end();
-    return FG;
-}
 
 /**
  * @property {object} [symbol.slider] Predefined symbol: slider
