@@ -19,7 +19,7 @@
     <!--  <script src="https://gitcdn.xyz/repo/goessner/g2-svg/master/g2.svg.min.js"></script>-->
 
     <script>
-
+        g2.symbol.labelSignificantDigits = 0;
         const ctx = document.getElementById("cnv").getContext("2d");
         const interactor = canvasInteractor.create(ctx, { x: 140, y: 140, cartesian: true });
         const selector = g2.selectorHdl(interactor.evt);  // sharing 'evt' object ... !
@@ -28,25 +28,27 @@
         const g = g2().view(interactor.view)// use vw to change view on the run
             .clr().grid();
         const D = { x: 20, y: 100 };
-        console.log(`${Math.atan2(0, 200)}`)
+
         // g.gndline({ x1: 20, y1: 20, x2: 220, y2: 340, w: 1, label: { str: 'A0', loc: 'n' } });
         g.gnd({ x: 20, y: 20, label: { str: 'A\u2080', loc: 'n' } });
         g.gndlines({ x: 720, y: 720, w: 1, anz: 10, ds: [10, 20] });
         g.gndlines({ x: 120, y: 20, w: 0, });
         g.use({ grp: "slider", x: 120, y: 100, w: 1.5, ls: "green" });
         g.use({ grp: "pol", x: 120, y: 100, w: 1.5, ls: "green" });
-        g.nodfix2({ x: 520, y: 20, w: 0, label: "A0" });
+        g.nodfix2({ x: 520, y: 20, w: 0, label: "A0", ls: "red" });
         const B0 = { x: 520, y: 120, w: 1.0, label: "B0" }
         g.nodfix2(B0);
         g.gndline({ x1: 10, y1: 220, x2: -100, y2: 600, label: { str: "line_out;@len;mm", off: 4, loc: "end" }, lw: 1, ls: "black", typ: "out" });
-        g.gndline({ x1: 110, y1: 220, x2: 00, y2: 600, label: "line_mid", lw: 1, ls: "black", typ: "mid" });
-        g.gndline({ x1: 210, y1: 220, x2: 100, y2: 600, label: "line_full", lw: 1, ls: "black", typ: "full" });
-        g.gndline({ x1: 310, y1: 220, x2: 200, y2: 600, label: "line_default", lw: 1, ls: "black" });
-        g.guide({ x1: 310, y1: 620, x2: 800, y2: 700, label: "guide", lw: 2, ls: "black", ds: [10, 10], anz: 3 });
+        g.gndline({ x1: 110, y1: 220, x2: 00, y2: 600, label: { str: "line_mid" }, lw: 1, ls: "red", typ: "mid" });
+        g.gndline({ x1: 210, y1: 220, x2: 100, y2: 600, label: "line_full", lw: 1, ls: "green", typ: "full" });
+        g.gndline({ x1: 310, y1: 220, x2: 200, y2: 600, label: "line_default", lw: 1, ls: "orange" });
+        g.gndline({ x1: -100, y1: 180, w: Math.PI / 2, len: 200, label: "line_byAngle", lw: 1, ls: "purple" });
+        g.guide({ x1: 310, y1: 620, x2: 800, y2: 700, label: "guide", lw: 2, ls: "blue", ds: [10, 10], anz: 3 });
         g.guide({ x1: 310, y1: 420, w: 1, len: 200, label: "guide2", lw: 2, ls: "black", ds: [10, 10], anz: 3 });
 
-        const E0 = { x: 700, y: 100, label: "E0" }; const F0 = { x: 900, y: 100, label: "F0" }; const G0 = { x: 800, y: 200, label: "G0" }; const H0 = { x: 700, y: 300, label: "H0" }; const I0 = { x: 900, y: 300, label: "I0" };
-        g.angle({ p1: F0, p2: G0, p: E0, ls: "blue", fs: "white", r: 80, side: -1 });
+        const E0 = { x: 700, y: 100, label: "E0" }; const F0 = { x: 900, y: 100, label: "F0" }; const G0 = { x: 799, y: 200, label: "G0" }; const H0 = { x: 700, y: 300, label: "H0" }; const I0 = { x: 900, y: 300, label: "I0" };
+        g.angle({ p1: F0, p2: G0, p: E0, ls: "blue", fs: "white", r: 80, side: -1, label: "@angle;°" });
+        g.angle({ p1: F0, p2: G0, p: E0, ls: "red", fs: "transparent", r: 80, side: 1, label: "@angle;°" });
         g.pol(E0).pol(F0).pol(I0).nod(G0).nod(H0).nod(I0);
         g.Ecke({ p1: G0, p2: H0, p3: I0, ls: "blue", fs: "green", size: 90, side: -2 });
         g.exe(ctx).exe(document.getElementById("svg"));;

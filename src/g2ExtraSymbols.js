@@ -19,7 +19,7 @@
 g2.symbol = g2.symbol || {};
 g2.symbol.poldot = g2().cir({ x: 0, y: 0, r: 1.32, ls: "transparent", fs: "black" });
 g2.symbol.nodfill3 = "white";
-g2.symbol.pol = g2().cir({ x: 0, y: 0, r: 6, ls: "black", lw: 1.5, fs: "white" }).use({ grp: 'poldot' });
+g2.symbol.pol = g2().cir({ x: 0, y: 0, r: 6, lw: 1.5, fs: "white" }).use({ grp: 'poldot' });
 g2.symbol.Xcross = g2().lin({ x1: 5, y1: 5, x2: -5, y2: -5 }).lin({ x1: 5, y1: -5, x2: -5, y2: 5 });
 g2.symbol.gndlines = g2().lin({ x1: -10, y1: -5, x2: -5, y2: 0 })
     .lin({ x1: -5, y1: -5, x2: -0, y2: 0 })

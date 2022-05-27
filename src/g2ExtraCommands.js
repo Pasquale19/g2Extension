@@ -71,7 +71,7 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
     h: 12, //height
     g2(vw) {
         const { x, y, w, h, scl, width, ls = g2.symbol.nodcolor, fs = g2.symbol.nodfill3, fs_2 = '#fefefe99' } = this;
-        let FG = g2().beg({ x, y, scl, w })
+        let FG = g2().beg({ x, y, scl, w, ls, fs })
             .lin({ x1: -width - 5, y1: -h, x2: width + 5, y2: -h })
             .path({
                 seg: [
@@ -113,15 +113,27 @@ g2.prototype.nodfix2.prototype = g2.mixin(g2.ifc.point, g2.ifc.circular, g2.ifc.
  */
 g2.prototype.gndline = function ({ x1, x2, y1, y2, typ, ls, ds, anz }) { return this.addCommand({ c: 'gndline', a: arguments[0] }); }
 g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
-    x1: 0, y1: 0, x2: 100, y2: 100,
+    set x2(q) { if (Object.getOwnPropertyDescriptor(this, 'p2')) this.p2.x = q; },
+    set y2(q) { if (Object.getOwnPropertyDescriptor(this, 'p2')) this.p2.y = q; },
+    lboff: 0.5, off: 4,
     g2(vw) {
-        const { x1, y1, x2, y2, lw = 2, ls = g2.symbol.nodcolor, typ = 'out', anz = 4, ds = [5, 12] } = this;
+        const { x1, y1, lw = 2, ls = g2.symbol.nodcolor, typ = 'out', anz = 4, ds = [5, 12] } = this;
+        let B;
+        if (this.w !== undefined) {
+            this.x2 = x1 + Math.cos(this.w) * this.len;
+            this.y2 = y1 + Math.sin(this.w) * this.len;
+        }
+        const x2 = this.x2;
+        const y2 = this.y2;
+
         const vec = { x: x2 - x1, y: y2 - y1 };
         const angle = Math.atan2(vec.y, vec.x);//Winkel des Vektors
-        const len = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
+        //const len = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
 
-        const drw = g2();
+        const drw = g2().beg(ls);
         let min, P1, P2;
+
+        const len = this.len;
         switch (typ) {
             case 'mid':
                 min = (len - 8 * (anz + 1) / 2 - len / 2) / len;
@@ -157,7 +169,7 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
                 drw.gndlines({ x: P2.x, y: P2.y, w: angle, ls: ls, lw: lw });
                 break;
         }
-        return drw.lin({ x1, y1, x2, y2, lw: lw * 2, label: this.label === undefined ? "" : this.label });
+        return drw.lin({ x1, y1, x2, y2, lw: lw * 2, ls: ls, label: this.label === undefined ? "" : this.label }).end();
     }
 });
 
@@ -180,22 +192,32 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
  * g2().guide({x1:150,y1:75,x2:350,y2:125,typ:'out'})
  */
 g2.prototype.guide = function ({ x1, x2, y1, y2, w, ls }) { return this.addCommand({ c: 'guide', a: arguments[0] }); }
-g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
-    lbloc: 'w',
+g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, {
+    lbloc: '0.5',
     lboff: 4,
+    set x2(q) { if (Object.getOwnPropertyDescriptor(this, 'p2')) this.p2.x = q; },
+    set y2(q) { if (Object.getOwnPropertyDescriptor(this, 'p2')) this.p2.y = q; },
+
     g2(vw) {
-        const { x1, y1, x2, y2, lw = 1, ls = g2.symbol.nodcolor, anz = 4, ds = [5, 10] } = this;
-        let args, vec, w, len;
-        if (this.w === undefined) {
-            vec = { x: x2 - x1, y: y2 - y1 };
-            w = Math.atan2(vec.y, vec.x);//Winkel des Vektors            
-        }
-        else {
+        const { x1, y1, lw = 1, ls = g2.symbol.nodcolor, anz = 4, ds = [5, 10] } = this;
+        let args, len;
+        if (this.w !== undefined) {
             len = Object.getOwnPropertyDescriptor(this, 'len') ? this.len : 100;
-            w = this.w;//Winkel des Vektors
-            vec = { x: len * Math.cos(w), y: Math.sin(w) * len };
-            const w2 = Math.atan2(vec.y, vec.x);
+            //  console.log(this.w);
+            this.x2 = x1 + Math.cos(this.w) * len;
+            this.y2 = y1 + Math.sin(this.w) * len;
+            //  console.log(this.x2);
+
         }
+        // console.log(this.x2);
+        const x2 = this.x2;
+        const y2 = this.y2;
+
+        const vec = { x: x2 - x1, y: y2 - y1 };
+        const w = Math.atan2(vec.y, vec.x);//Winkel des Vektors
+
+
+
         const width = Object.getOwnPropertyDescriptor(this, 'width') ? this.width : 24;
         //calculate corner Points
         const CP1 = { x: x1 - Math.sin(w) * width / 2, y: y1 + Math.cos(w) * width / 2 };
@@ -205,8 +227,10 @@ g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
 
         //start Drawing
         const drw = g2().beg({ ls: ls })
-            .gndline({ x1: CP2.x, y1: CP2.y, x2: CP1.x, y2: CP1.y, lw: lw, ds, anz, typ: 'out' })
-            .gndline({ x1: CP3.x, y1: CP3.y, x2: CP4.x, y2: CP4.y, lw: lw, ds, anz, typ: 'out' })
+            // .cir({ x: x1, y: y1, r: 10, ls: ls })
+            // .cir({ x: x2, y: y2, r: 10, ls: ls })
+            .gndline({ x1: CP2.x, y1: CP2.y, x2: CP1.x, y2: CP1.y, lw: lw, ls: ls, ds, anz, typ: 'out' })
+            .gndline({ x1: CP3.x, y1: CP3.y, x2: CP4.x, y2: CP4.y, lw: lw, ls: ls, ds, anz, typ: 'out' })
             .end();
         return drw;
     }
@@ -214,7 +238,7 @@ g2.prototype.guide.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
 
 
 /**
- * Draws fixed slot for slider
+ * Draws fixed fixed angle for three nodes
  * @method
  * @returns {object} g2
  * @param {object} - guide arguments object.
@@ -256,10 +280,9 @@ g2.prototype.Ecke.prototype = g2.mixin(g2.ifc.label, {
                 { c: 'l', x: 0, y: 0 },
                 { c: 'l', x: size, y: 0 },
                 { c: 'z' }
-                , ls, fs]
+            ], ls, fs
         });
         g.end();
-        console.log(fs);
         return g;
     }
 });
@@ -275,12 +298,14 @@ g2.prototype.Ecke.prototype = g2.mixin(g2.ifc.label, {
  * @property {number} [r] - radius of angle symbol
  */
 g2.prototype.angle = function ({ p1, p2, p, w, ls, r }) { return this.addCommand({ c: 'angle', a: arguments[0] }); }
-g2.prototype.angle.prototype = {
-    lbloc: "e", lboff: 2,
+g2.prototype.angle.prototype = g2.mixin(g2.ifc.point, g2.ifc.arc, g2.ifc.arc, {
+    lbloc: "0.5", r: 12,
+    get angle2() { return Math.round(this.dw * 180 / Math.PI) },
     g2(vw) {
         const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 4, size = 20, fs = "transparent", side = 1, r = 20 } = this;
-        const w1 = this.wref1 === undefined ? Math.PI + Math.atan2(p1.y - p.y, p1.x - p.x) : this.wref1.w;
-        const w2 = this.wref2 === undefined ? Math.PI + Math.atan2(p2.y - p.y, p2.x - p.x) : this.wref2.w;
+        const k = Math.sign(side) < 0 ? Math.PI : 0;
+        const w1 = this.wref1 === undefined ? k + Math.atan2(p1.y - p.y, p1.x - p.x) : this.wref1.w;
+        const w2 = this.wref2 === undefined ? k + Math.atan2(p2.y - p.y, p2.x - p.x) : this.wref2.w;
         let dw = (w2 - w1) % (2 * Math.PI);
         const v1 = { x: p.x + Math.cos(w1) * r, y: Math.sin(w1) * r + p.y };
         const v2 = { x: p.x + Math.cos(w2) * r, y: Math.sin(w2) * r + p.y };
@@ -291,13 +316,20 @@ g2.prototype.angle.prototype = {
             .l({ x: p.x, y: p.y })
             .z()
             .fill(fs);
-        drw.cir({ p: p, label: { str: `${Math.round(180 / Math.PI * dw)}°` } })
+        drw.cir({ p: p })
         drw.lin({ p1: p, p2: v1 });
-        drw.arc({ p: p, r: r, w: w1, dw: dw, label: { str: '@angle;°' } })
+        let lblstr = this.label;
+        if (typeof lblstr === 'string' || lblstr instanceof String) { }
+        else {
+            lblstr = this.label.str ? this.label.str : "";
+        }
+        lblstr = lblstr.replace("@angle", Math.abs(Math.round(dw * 180 / Math.PI)));
+        // console.log(this.x);
+        drw.arc({ p: p, r: r, w: w1, dw: dw, label: this.label, ls: ls })
         drw.lin({ p1: p, p2: v2 });
         drw.end();
         return drw;
 
 
     }
-};
+});
