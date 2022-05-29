@@ -125,7 +125,7 @@ g2.prototype.gndline.prototype = g2.mixin(g2.ifc.line, g2.ifc.label, {
         }
         const x2 = this.x2;
         const y2 = this.y2;
-
+        //console.log(`${this.x2} ${this.y2}`);
         const vec = { x: x2 - x1, y: y2 - y1 };
         const angle = Math.atan2(vec.y, vec.x);//Winkel des Vektors
         //const len = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
@@ -296,17 +296,23 @@ g2.prototype.Ecke.prototype = g2.mixin(g2.ifc.label, {
  * @property {string} [wref1] - referenced constraint id for angle1.
  * @property {string} [wref2] - referenced constraint id for angle2.
  * @property {number} [r] - radius of angle symbol
+ *  * @property {bool} [small] - |angle| symbol is always <=Math.PI
  */
 g2.prototype.angle = function ({ p1, p2, p, w, ls, r }) { return this.addCommand({ c: 'angle', a: arguments[0] }); }
 g2.prototype.angle.prototype = g2.mixin(g2.ifc.point, g2.ifc.arc, g2.ifc.arc, {
     lbloc: "0.5", r: 12,
     get angle2() { return Math.round(this.dw * 180 / Math.PI) },
     g2(vw) {
-        const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 4, size = 20, fs = "transparent", side = 1, r = 20 } = this;
+        const { p1, p2, p, lw = 1, ls = g2.symbol.nodcolor, anz = 1, size = 20, fs = "transparent", side = 1, r = 20, small = false } = this;
         const k = Math.sign(side) < 0 ? Math.PI : 0;
+        const PI = Math.PI;
         const w1 = this.wref1 === undefined ? k + Math.atan2(p1.y - p.y, p1.x - p.x) : this.wref1.w;
         const w2 = this.wref2 === undefined ? k + Math.atan2(p2.y - p.y, p2.x - p.x) : this.wref2.w;
-        let dw = (w2 - w1) % (2 * Math.PI);
+        let dw = (w2 - w1) % (2 * PI);
+        if (this.small = true && Math.abs(dw) > PI) {
+            dw = (2 * PI - Math.abs(dw)) * Math.sign(dw) * -1;
+        }
+        //console.log(dw);
         const v1 = { x: p.x + Math.cos(w1) * r, y: Math.sin(w1) * r + p.y };
         const v2 = { x: p.x + Math.cos(w2) * r, y: Math.sin(w2) * r + p.y };
         const drw = g2().beg({ fs: fs, ls: ls });
@@ -318,14 +324,11 @@ g2.prototype.angle.prototype = g2.mixin(g2.ifc.point, g2.ifc.arc, g2.ifc.arc, {
             .fill(fs);
         drw.cir({ p: p })
         drw.lin({ p1: p, p2: v1 });
-        let lblstr = this.label;
-        if (typeof lblstr === 'string' || lblstr instanceof String) { }
-        else {
-            lblstr = this.label.str ? this.label.str : "";
+
+        drw.arc({ p: p, r: r, w: w1, dw: dw, label: this.label, ls: ls });
+        for (let i = 1; i < anz; i += 1) {
+            drw.arc({ p: p, r: r - 2 * lw * i, w: w1, dw: dw, label: this.label, ls: ls });
         }
-        lblstr = lblstr.replace("@angle", Math.abs(Math.round(dw * 180 / Math.PI)));
-        // console.log(this.x);
-        drw.arc({ p: p, r: r, w: w1, dw: dw, label: this.label, ls: ls })
         drw.lin({ p1: p, p2: v2 });
         drw.end();
         return drw;
